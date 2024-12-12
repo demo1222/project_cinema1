@@ -60,6 +60,11 @@ class MainApp(QtWidgets.QMainWindow):
         else:
             QtWidgets.QMessageBox.warning(self.login_window, "Error", "Invalid username or password.")
 
+    def mouseMoveEvent(self, event):
+        if not self.mouse_moved:
+            self.mouse_moved = True
+            self.captcha_checkbox.setEnabled(True)
+
     def open_adminpanel(self):
         self.admin_window = QtWidgets.QMainWindow()
         self.admin_window_ui = Ui_Admin()
