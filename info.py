@@ -50,7 +50,7 @@ class Ui_info(object):
             color: #FFFFFF;  /* White text */
             font-size: 22px;  /* Font size */
         """)
-        self.label_empty_session.setText("")  # Initially empty
+        self.label_empty_session.setText("1")  # Initially empty
         self.label_empty_session.setObjectName("label_empty_session")
 
         # Empty Free Seats Label
@@ -60,7 +60,7 @@ class Ui_info(object):
             color: #FFFFFF;  /* White text */
             font-size: 22px;  /* Font size */
         """)
-        self.label_empty_free_seats.setText("")  # Initially empty
+        self.label_empty_free_seats.setText("2")  # Initially empty
         self.label_empty_free_seats.setObjectName("label_empty_free_seats")
 
         # Empty Movie Name Label
@@ -70,7 +70,7 @@ class Ui_info(object):
             color: #FFFFFF;  /* White text */
             font-size: 22px;  /* Font size */
         """)
-        self.label_empty_movie_name.setText("")  # Initially empty
+        self.label_empty_movie_name.setText("3")  # Initially empty
         self.label_empty_movie_name.setObjectName("label_empty_movie_name")
 
         # Session Label

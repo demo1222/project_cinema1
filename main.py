@@ -6,10 +6,12 @@ from main_window import *
 from regis import *
 from admin import *
 from seats import *
+from info import *
 import json
 
 movie = None
 time1 = None
+arr = []
 me = []
 admins = ['emil']
 
@@ -20,10 +22,15 @@ class MainApp(QtWidgets.QMainWindow):
         self.login_window = QtWidgets.QMainWindow()
         self.login_ui = Ui_loginpage()
         self.login_ui.setupUi(self.login_window)
+        self.login_window.setMaximumSize(655, 580)
         self.login_window.show()
 
         self.login_ui.pushButtonlogin.clicked.connect(self.login)
         self.login_ui.register_2.linkActivated.connect(self.open_registerwindow)
+
+        self.mouse_moved = False
+        self.setMouseTracking(True)
+        self.login_window.setMouseTracking(True)
 
         movie = None
         time1 = None
@@ -35,6 +42,9 @@ class MainApp(QtWidgets.QMainWindow):
         confirmation = self.register_window_ui.lineEdit_confirmregistpassword.text()
         if password != confirmation:
             return QtWidgets.QMessageBox.warning(self.login_window, "Error", "Passwords must be matched")
+        if len(username) < 1 or len(password) < 1:
+            QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please type login/password.")
+            return
         url = 'https://zarylbek.pythonanywhere.com/register'
         register_try = {'username': username, 'password':password}
         response = requests.get(url, params=register_try)
@@ -51,6 +61,12 @@ class MainApp(QtWidgets.QMainWindow):
         url = 'https://zarylbek.pythonanywhere.com/login'
         login_try = {'username': username, 'password':password}
         response = requests.get(url, params=login_try)
+        if len(username) < 1 or len(password) < 1:
+            QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please type login/password.")
+            return
+        if not self.login_ui.checkBox.isChecked():
+            QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please confirm you are not a robot.")
+            return
         if response.status_code == 200:
             me.append(username)
             self.login_window.close()
@@ -63,7 +79,7 @@ class MainApp(QtWidgets.QMainWindow):
     def mouseMoveEvent(self, event):
         if not self.mouse_moved:
             self.mouse_moved = True
-            self.captcha_checkbox.setEnabled(True)
+            self.login_ui.checkBox.setEnabled(True)
 
     def open_adminpanel(self):
         self.admin_window = QtWidgets.QMainWindow()
@@ -81,8 +97,13 @@ class MainApp(QtWidgets.QMainWindow):
         url = 'https://zarylbek.pythonanywhere.com/add_movie'
         addmovie_try = {'title':title, 'time':time}
         response = requests.get(url, params = addmovie_try)
+        if len(title) < 1 or len(time) < 1:
+            return QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please type login/password.")
         if response.text == f'{time} is successfully added to movie {title}':
             QtWidgets.QMessageBox.information(self.login_window, "Done", "Successfully added.")
+            self.main_window_ui.listWidget_main_title.clear()
+            for i in self.checkMovies():
+                self.main_window_ui.listWidget_main_title.addItem(i)
         elif response.text ==  f'{time} already exists':
             QtWidgets.QMessageBox.warning(self.login_window, "Error", "Schedule is already exist.")
 
@@ -92,8 +113,13 @@ class MainApp(QtWidgets.QMainWindow):
         url = 'https://zarylbek.pythonanywhere.com/remove_movie'
         removemovie_try = {'title':title, 'time':time}
         response = requests.get(url, params= removemovie_try)
+        if len(title) < 1 or len(time) < 1:
+            return QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please type login/password.")
         if response.text == 'Success':
             QtWidgets.QMessageBox.information(self.login_window, "Done", "Successfully removed.")
+            self.main_window_ui.listWidget_main_title.clear()
+            for i in self.checkMovies():
+                self.main_window_ui.listWidget_main_title.addItem(i)
         elif response.text ==  'Movie does not exist':
             QtWidgets.QMessageBox.warning(self.login_window, "Error", "Movie does not exist")
         elif response.text == 'Schedule does not exist':
@@ -122,6 +148,7 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window_ui.listWidget_main_title.itemClicked.connect(self.on_item_clicked)
         self.main_window_ui.listWidget_main_schedule.itemClicked.connect(self.changetime)
         self.main_window_ui.pushButton_but_main.clicked.connect(self.open_buyseatswindow)
+        self.main_window_ui.pushButton_movi_info.clicked.connect(self.open_MovieInfoWindow)
 
     def checkMovies(self):
         url = 'https://zarylbek.pythonanywhere.com/get_onlymovies'
@@ -129,8 +156,10 @@ class MainApp(QtWidgets.QMainWindow):
         return json.loads(response.text)
     
     def on_item_clicked(self, item):
+        arr.clear()
         self.main_window_ui.listWidget_main_schedule.clear()
         self.movie = item.text()
+        self.time1 = None
         res = []
         url = 'https://zarylbek.pythonanywhere.com/get_movies'
         response = requests.get(url)
@@ -144,10 +173,28 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window_ui.listWidget_main_title.clear()
         for i in self.checkMovies():
             self.main_window_ui.listWidget_main_title.addItem(i)
+            arr.append(i)
 
     def changetime(self, item):
         print(item.text())
         self.time1 = item.text()
+
+    def open_MovieInfoWindow(self):
+        self.MovieInfoWindow = QtWidgets.QMainWindow()
+        self.MovieInfoWindow_ui = Ui_info()
+        self.MovieInfoWindow_ui.setupUi(self.MovieInfoWindow)
+        self.MovieInfoWindow.show()
+        title = str(self.movie)
+        time = str(self.time1)
+        url = 'https://zarylbek.pythonanywhere.com/get_seats'
+        getSeats_try = {'title':title, 'time':time}
+        response = requests.get(url, getSeats_try)
+        if response.status_code == 200:
+            self.MovieInfoWindow_ui.label_empty_movie_name.setText(title)
+            response = response.json()
+            self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum([1 for i, k in response.items() if not k])))
+        else:
+            print('aa')
     
     def open_buyseatswindow(self):
         self.buy_window = QtWidgets.QMainWindow()
@@ -228,9 +275,6 @@ class MainApp(QtWidgets.QMainWindow):
             self.dict = not self.dict
         else:
             print(f"Кнопка {numb} не найдена для изменения стиля.")
-
-    def toggleBlack(self):
-        self.buy_window_ui.pushButton_a1.setStyleSheet("QPushButton { background-color: black; }")
 
     def log_out(self):
         try:
