@@ -32,9 +32,6 @@ class MainApp(QtWidgets.QMainWindow):
         self.setMouseTracking(True)
         self.login_window.setMouseTracking(True)
 
-        movie = None
-        time1 = None
-
 
     def register(self):
         username = self.register_window_ui.lineEdit_regist_login.text()
@@ -163,7 +160,8 @@ class MainApp(QtWidgets.QMainWindow):
         res = []
         url = 'https://zarylbek.pythonanywhere.com/get_movies'
         response = requests.get(url)
-        jsonied = json.loads(response.text)
+        print(response.text)
+        jsonied = response.json()
         for i,k in jsonied.items():  #{moana:[11:30, 12:30, moana2:[11:30]]}
             if i == item.text():
                 res += k
@@ -186,13 +184,20 @@ class MainApp(QtWidgets.QMainWindow):
         self.MovieInfoWindow.show()
         title = str(self.movie)
         time = str(self.time1)
-        url = 'https://zarylbek.pythonanywhere.com/get_seats'
-        getSeats_try = {'title':title, 'time':time}
-        response = requests.get(url, getSeats_try)
+        if time != 'None':
+            url = 'https://zarylbek.pythonanywhere.com/get_seats'
+            getSeats_try = {'title':title, 'time':time}
+            response = requests.get(url, getSeats_try)
+        else: 
+            url = 'https://zarylbek.pythonanywhere.com/get_movieinfo'
+            getSeats_try = {'title':title}
+            response = requests.get(url, getSeats_try)
+        print(response)
         if response.status_code == 200:
             self.MovieInfoWindow_ui.label_empty_movie_name.setText(title)
             response = response.json()
-            self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum([1 for i, k in response.items() if not k])))
+            print(response)
+            self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum([int(i) for i in response])))
         else:
             print('aa')
     
@@ -246,12 +251,11 @@ class MainApp(QtWidgets.QMainWindow):
                 else:
                     print('bad')
         return button
-
-                
+    
     def checkSeats(self):
         title = str(self.movie)
         time = str(self.time1)
-        url = 'https://zarylbek.pythonanywhere.com/get_seats'
+        url = 'https://zarylbek.pythonanywhere.com/get_seatsInDict'
         getSeats_try = {'title':title, 'time':time}
         response = requests.get(url, params = getSeats_try)
         if response.status_code == 200:
@@ -261,20 +265,6 @@ class MainApp(QtWidgets.QMainWindow):
         else:
             print(f"Ошибка {response.status_code}: {response.text}")
         print(response)
-
-    def toggle(self, numb):
-        print(numb)
-        but = getattr(self.buy_window_ui, f'pushButton_{numb}', None)
-        
-        # Проверка, что кнопка найдена
-        if but:
-            if self.dict:
-                but.setStyleSheet("QPushButton { background-color: white; }")
-            else:
-                but.setStyleSheet("QPushButton { background-color: red; }")
-            self.dict = not self.dict
-        else:
-            print(f"Кнопка {numb} не найдена для изменения стиля.")
 
     def log_out(self):
         try:
