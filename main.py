@@ -7,6 +7,7 @@ from regis import *
 from admin import *
 from seats import *
 from info import *
+from history import *
 import json
 
 movie = None
@@ -31,6 +32,9 @@ class MainApp(QtWidgets.QMainWindow):
         self.mouse_moved = False
         self.setMouseTracking(True)
         self.login_window.setMouseTracking(True)
+
+        self.movie = None
+        self.time1 = None
 
 
     def register(self):
@@ -117,12 +121,16 @@ class MainApp(QtWidgets.QMainWindow):
             self.main_window_ui.listWidget_main_title.clear()
             for i in self.checkMovies():
                 self.main_window_ui.listWidget_main_title.addItem(i)
+            if title == self.movie:
+                self.movie = None
+                self.time1 = None
         elif response.text ==  'Movie does not exist':
             QtWidgets.QMessageBox.warning(self.login_window, "Error", "Movie does not exist")
         elif response.text == 'Schedule does not exist':
             QtWidgets.QMessageBox.warning(self.login_window, "Error", "Schedule does not exist")
         else:
             QtWidgets.QMessageBox.warning(self.register_window, "Error", "Unknown Error")
+
 
     def open_registerwindow(self):
         self.login_window.close()
@@ -146,6 +154,7 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window_ui.listWidget_main_schedule.itemClicked.connect(self.changetime)
         self.main_window_ui.pushButton_but_main.clicked.connect(self.open_buyseatswindow)
         self.main_window_ui.pushButton_movi_info.clicked.connect(self.open_MovieInfoWindow)
+        self.main_window_ui.pushButton_user_history.clicked.connect(self.open_UserHistoryWindow)
 
     def checkMovies(self):
         url = 'https://zarylbek.pythonanywhere.com/get_onlymovies'
@@ -185,23 +194,61 @@ class MainApp(QtWidgets.QMainWindow):
         title = str(self.movie)
         time = str(self.time1)
         if time != 'None':
-            url = 'https://zarylbek.pythonanywhere.com/get_seats'
+            url = 'https://zarylbek.pythonanywhere.com/get_seatsInDict'
             getSeats_try = {'title':title, 'time':time}
             response = requests.get(url, getSeats_try)
+            if response.status_code == 200:
+                self.MovieInfoWindow_ui.label_empty_movie_name.setText(title + ', ' + time)
+                response = response.json()
+                self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(len([i for i,k in response.items() if not k])))
+                self.MovieInfoWindow_ui.label_empty_session.setText('1')
+                for i,k in response.items():
+                    if k:
+                        label = i + ', ' + k + ', ' + title
+                        self.MovieInfoWindow_ui.listWidget_to_show_people.addItem(label)
+                self.MovieInfoWindow_ui.listWidget_to_show_people.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
         else: 
-            url = 'https://zarylbek.pythonanywhere.com/get_movieinfo'
+            url = 'https://zarylbek.pythonanywhere.com/get_seatsAll'
             getSeats_try = {'title':title}
             response = requests.get(url, getSeats_try)
+            if response.status_code == 200:
+                self.MovieInfoWindow_ui.label_empty_movie_name.setText(title)
+                response = response.json()
+                self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum(1 for i,k in response.items() for j,o in k.items() if not o)))
+                for i,k in response.items():
+                    for j,o in k.items():
+                        if o:
+                            label = j + ', ' + o + ', ' + title + ', ' + i
+                            self.MovieInfoWindow_ui.listWidget_to_show_people.addItem(label)
+
         print(response)
+
+    def open_UserHistoryWindow(self):
+        self.UserHistory_window = QtWidgets.QMainWindow()
+        self.UserHistory_ui = Ui_user_history()
+        self.UserHistory_ui.setupUi(self.UserHistory_window)
+        self.UserHistory_window.show()
+        url = 'https://zarylbek.pythonanywhere.com/get_infoClient'
+        response = requests.get(url, params = {'client': me[0]})
         if response.status_code == 200:
-            self.MovieInfoWindow_ui.label_empty_movie_name.setText(title)
             response = response.json()
+            self.UserHistory_ui.label_user_history.setText(me[0] + "'s" + ' ' + 'history')
+            for i,k in response.items():
+                for i1, k1 in k.items():
+                        for i2 in k1:
+                            self.UserHistory_ui.listWidget_movie.addItem(i)
+                            self.UserHistory_ui.listWidget_time.addItem(i1)
+                            self.UserHistory_ui.listWidget_seat.addItem(i2)
             print(response)
-            self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum([int(i) for i in response])))
-        else:
-            print('aa')
-    
+        print(response)
+
+
+
     def open_buyseatswindow(self):
+        if self.movie and self.time1:
+            pass
+        else:
+            return QtWidgets.QMessageBox.warning(self.main_window, "Error", "Choose movie and schedule for it")
         self.buy_window = QtWidgets.QMainWindow()
         self.buy_window_ui = Ui_seats()
         self.buy_window_ui.setupUi(self.buy_window)
@@ -280,8 +327,11 @@ class MainApp(QtWidgets.QMainWindow):
             self.login_ui.pushButtonlogin.clicked.connect(self.login)
             self.login_ui.register_2.linkActivated.connect(self.open_registerwindow)
         self.login_window.show()
+        self.movie = None
+        self.time1 = None
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     main_app = MainApp()
     sys.exit(app.exec_())
+    

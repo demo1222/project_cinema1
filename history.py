@@ -49,7 +49,7 @@ class Ui_user_history(object):
 
         # Списки для отображения информации
         self.listWidget_seat = QtWidgets.QListWidget(user_history)
-        self.listWidget_seat.setGeometry(QtCore.QRect(410, 140, 151, 41))
+        self.listWidget_seat.setGeometry(QtCore.QRect(410, 140, 151, 300))
         self.listWidget_seat.setStyleSheet(
             "QListWidget {"
             "background-color: white; color: black; font-size: 18px; border-radius: 10px;"
@@ -58,7 +58,7 @@ class Ui_user_history(object):
         self.listWidget_seat.setObjectName("listWidget_seat")
 
         self.listWidget_time = QtWidgets.QListWidget(user_history)
-        self.listWidget_time.setGeometry(QtCore.QRect(250, 140, 151, 41))
+        self.listWidget_time.setGeometry(QtCore.QRect(250, 140, 151, 300))
         self.listWidget_time.setStyleSheet(
             "QListWidget {"
             "background-color: white; color: black; font-size: 18px; border-radius: 10px;"
@@ -67,7 +67,7 @@ class Ui_user_history(object):
         self.listWidget_time.setObjectName("listWidget_time")
 
         self.listWidget_movie = QtWidgets.QListWidget(user_history)
-        self.listWidget_movie.setGeometry(QtCore.QRect(90, 140, 151, 41))
+        self.listWidget_movie.setGeometry(QtCore.QRect(90, 140, 151, 300))
         self.listWidget_movie.setStyleSheet(
             "QListWidget {"
             "background-color: white; color: black; font-size: 18px; border-radius: 10px;"
