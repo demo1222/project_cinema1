@@ -239,7 +239,7 @@ class MainApp(QtWidgets.QMainWindow):
         response = requests.get(url, params = {'client': me[0]})
         if response.status_code == 200:
             response = response.json()
-            self.UserHistory_ui.label_user_history.setText(me[0] + "'s" + ' ' + 'history')
+            # self.UserHistory_ui.label_user_history.setText(me[0] + "'s" + ' ' + 'history')
             for i,k in response.items():
                 for i1, k1 in k.items():
                         for i2 in k1:

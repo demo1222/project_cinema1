@@ -19,7 +19,8 @@ class Ui_user_history(object):
 
         # Заголовок "User's history"
         self.label_user_history = QtWidgets.QLabel(user_history)
-        self.label_user_history.setGeometry(QtCore.QRect(250, 40, 131, 31))
+        self.label_user_history.setGeometry(QtCore.QRect(250, 40, 1310, 31))
+        self.label_user_history
         self.label_user_history.setStyleSheet(
             "color: white; font-size: 22px;"
         )
