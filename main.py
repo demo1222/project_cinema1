@@ -86,6 +86,7 @@ class MainApp(QtWidgets.QMainWindow):
         self.admin_window = QtWidgets.QMainWindow()
         self.admin_window_ui = Ui_Admin()
         self.admin_window_ui.setupUi(self.admin_window)
+        self.admin_window.setMaximumSize(655, 580)
         self.admin_window.show()
 
         self.admin_window_ui.pushButton_sign_out.clicked.connect(self.log_out)
@@ -131,11 +132,11 @@ class MainApp(QtWidgets.QMainWindow):
         else:
             QtWidgets.QMessageBox.warning(self.register_window, "Error", "Unknown Error")
 
-
     def open_registerwindow(self):
         self.login_window.close()
         self.register_window = QtWidgets.QMainWindow()
         self.register_window_ui = Ui_registration()
+        self.register_window.setMaximumSize(655, 580)
         self.register_window_ui.setupUi(self.register_window)
         self.register_window_ui.pushButton_register_login.clicked.connect(self.register)
         # self.register_window_ui.register_2.linkActivated.connect(self.log_out)
@@ -145,6 +146,7 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window = QtWidgets.QMainWindow()
         self.main_window_ui = Ui_main()
         self.main_window_ui.setupUi(self.main_window)
+        self.main_window.setMaximumSize(655, 580)
         self.main_window.show()
 
         self.main_window_ui.pushButton_sign_out_main.clicked.connect(self.log_out)
@@ -187,9 +189,12 @@ class MainApp(QtWidgets.QMainWindow):
         self.time1 = item.text()
 
     def open_MovieInfoWindow(self):
+        if not self.movie:
+            return QtWidgets.QMessageBox.warning(self.login_window, "Error", "Please choose movie.")
         self.MovieInfoWindow = QtWidgets.QMainWindow()
         self.MovieInfoWindow_ui = Ui_info()
         self.MovieInfoWindow_ui.setupUi(self.MovieInfoWindow)
+        self.MovieInfoWindow.setMaximumSize(655, 580)
         self.MovieInfoWindow.show()
         title = str(self.movie)
         time = str(self.time1)
@@ -215,6 +220,7 @@ class MainApp(QtWidgets.QMainWindow):
                 self.MovieInfoWindow_ui.label_empty_movie_name.setText(title)
                 response = response.json()
                 self.MovieInfoWindow_ui.label_empty_free_seats.setText(str(sum(1 for i,k in response.items() for j,o in k.items() if not o)))
+                self.MovieInfoWindow_ui.label_empty_session.setText(str(len(response)))
                 for i,k in response.items():
                     for j,o in k.items():
                         if o:
@@ -226,6 +232,7 @@ class MainApp(QtWidgets.QMainWindow):
     def open_UserHistoryWindow(self):
         self.UserHistory_window = QtWidgets.QMainWindow()
         self.UserHistory_ui = Ui_user_history()
+        self.UserHistory_window.setMaximumSize(655, 580)
         self.UserHistory_ui.setupUi(self.UserHistory_window)
         self.UserHistory_window.show()
         url = 'https://zarylbek.pythonanywhere.com/get_infoClient'
@@ -242,8 +249,6 @@ class MainApp(QtWidgets.QMainWindow):
             print(response)
         print(response)
 
-
-
     def open_buyseatswindow(self):
         if self.movie and self.time1:
             pass
@@ -252,6 +257,7 @@ class MainApp(QtWidgets.QMainWindow):
         self.buy_window = QtWidgets.QMainWindow()
         self.buy_window_ui = Ui_seats()
         self.buy_window_ui.setupUi(self.buy_window)
+        self.buy_window.setMaximumSize(655, 580)
         self.buy_window.show()
         self.dict = {f"{letter}{number}":False for letter in "abcdf" for number in range(1, 8)}
         for i,k in self.checkSeats().items():
@@ -323,6 +329,7 @@ class MainApp(QtWidgets.QMainWindow):
         if not hasattr(self, 'login_window') or not self.login_window.isVisible(): # на крайний случай это условие
             self.login_window = QtWidgets.QMainWindow()
             self.login_ui = Ui_loginpage()
+            self.login_window.setMaximumSize(655, 580)
             self.login_ui.setupUi(self.login_window)
             self.login_ui.pushButtonlogin.clicked.connect(self.login)
             self.login_ui.register_2.linkActivated.connect(self.open_registerwindow)
